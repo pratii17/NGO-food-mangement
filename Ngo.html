@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>NGO Food Donations</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body { font-family: Arial, sans-serif; background: #e0f2f1; margin: 0; }
+.header { background: #00695c; color: white; padding: 20px; text-align: center; font-size: 24px; }
+.tagline { color: #c8e6c9; font-size: 14px; }
+.container { padding: 15px; }
+
+/* Buttons */
+button { padding: 10px 15px; margin: 5px 0; background: #00796b; color: white; border: none; border-radius: 8px; cursor: pointer; }
+button:hover { background: #004d40; }
+
+/* Inputs */
+input, textarea, select { width: 100%; padding: 10px; margin: 6px 0; border-radius: 8px; border: 1px solid #aaa; }
+
+/* Cards */
+.card, .ngo-card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.2); margin: 10px; transition: transform 0.2s; }
+.card:hover, .ngo-card:hover { transform: translateY(-5px); }
+.card h3, .ngo-card h3 { margin: 0; color: #004d40; }
+
+/* Donor Grid */
+#donorList { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; }
+
+/* Dashboard Controls */
+.dashboard-controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+.dashboard-controls input { flex: 2; }
+.dashboard-controls select, .dashboard-controls button { flex: 1; }
+
+/* Inline Food + Category */
+.inline-input { display: flex; gap: 10px; margin: 5px 0; }
+.inline-input input { flex: 2; }
+.inline-input select { flex: 1; }
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    🍱 NGO Food Donations <br>
+    <span class="tagline">Donate Food • Save Lives • Spread Happiness</span>
+    <marquee scrollamount="6" style="color:#f1f8e9; font-size:15px; margin-top:8px;">
+        🍱 A meal shared is hope delivered • Serve Humanity 🤝 Spread Care ❤‍🩹
+    </marquee>
+</div>
+
+<div class="container">
+
+<!-- NAVIGATION -->
+<button onclick="showAddDonor()">Add Donor</button>
+<button onclick="showDashboard()">Donor Dashboard</button>
+<button onclick="showDelivered()">Delivered History</button>
+<button onclick="showNGOs()">NGO Finder</button>
+
+<!-- ADD DONOR -->
+<div id="addDonorSection">
+    <h2>Add Food Donor</h2>
+    <input id="name" placeholder="Donor Name">
+    <div class="inline-input">
+        <input id="food" placeholder="Food Type">
+        <select id="category">
+            <option value="">Select Category</option>
+            <option>Veg</option>
+            <option>Non-Veg</option>
+            <option>Grocery</option>
+            <option>Packed Food</option>
+            <option>Cooked Food</option>
+            <option>Bakery</option>
+            <option>Fruits & Vegetables</option>
+        </select>
+    </div>
+    <input id="qty" placeholder="Quantity">
+    <textarea id="address" placeholder="Address"></textarea>
+    <input id="phone" placeholder="Phone Number">
+    <button onclick="addDonor()">Save Donor</button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboardSection" style="display:none;">
+    <h2>Donor Dashboard</h2>
+    <div class="dashboard-controls">
+        <input id="searchDonor" placeholder="Search donors…">
+        <select id="filterCategory">
+            <option value="all">Filter by Category</option>
+            <option>Veg</option>
+            <option>Non-Veg</option>
+            <option>Grocery</option>
+            <option>Packed Food</option>
+            <option>Cooked Food</option>
+            <option>Bakery</option>
+            <option>Fruits & Vegetables</option>
+        </select>
+        <button onclick="searchDonor()">Search</button>
+    </div>
+    <div id="donorList"></div>
+</div>
+
+<!-- DELIVERED HISTORY -->
+<div id="deliveredSection" style="display:none;">
+    <h2>Delivered Donations</h2>
+    <div class="dashboard-controls">
+        <select id="sortDelivered" onchange="loadDelivered()">
+            <option value="latest">Sort: Latest First</option>
+            <option value="oldest">Sort: Oldest First</option>
+        </select>
+    </div>
+    <div id="deliveredList"></div>
+</div>
+
+<!-- NGO -->
+<div id="ngoSection" style="display:none;">
+    <h2>NGO Finder</h2>
+    <input id="ngoSearch" placeholder="Search NGO…">
+    <button onclick="searchNGO()">Search</button>
+    <div id="ngoListContainer"></div>
+</div>
+
+</div>
+
+<script>
+// ---------------- NGO LIST --------------------
+const ngoList = [
+  { name: "Helping Hands NGO", phone: "9876543210", area: "Bidar" },
+  { name: "Food For All Trust", phone: "9988776655", area: "Karnataka" },
+  { name: "Annadana Foundation", phone: "9012345678", area: "City Center" },
+  { name: "Smile Care NGO", phone: "9123456780", area: "Near Bus Stand" },
+  { name: "Humanity Food Bank", phone: "9090909090", area: "Old City" }
+];
+
+function loadNGOs() {
+    const c = document.getElementById("ngoListContainer");
+    c.innerHTML = "";
+    ngoList.forEach(ngo => {
+        c.innerHTML += `
+        <div class="ngo-card">
+            <h3>${ngo.name}</h3>
+            <p><b>Area:</b> ${ngo.area}</p>
+            <p><b>Phone:</b> ${ngo.phone}</p>
+            <button onclick="callNGO('${ngo.phone}')">Call NGO</button>
+        </div>`;
+    });
+}
+
+function callNGO(phone) { window.location.href = "tel:" + phone; }
+
+function searchNGO() {
+    const text = document.getElementById("ngoSearch").value.toLowerCase();
+    const c = document.getElementById("ngoListContainer");
+    c.innerHTML = "";
+    ngoList.filter(n => n.name.toLowerCase().includes(text) || n.area.toLowerCase().includes(text))
+           .forEach(ngo => {
+                c.innerHTML += `
+                <div class="ngo-card">
+                    <h3>${ngo.name}</h3>
+                    <p><b>Area:</b> ${ngo.area}</p>
+                    <p><b>Phone:</b> ${ngo.phone}</p>
+                    <button onclick="callNGO('${ngo.phone}')">Call NGO</button>
+                </div>`;
+           });
+}
+
+// ---------------- DONORS ---------------------
+let donors = JSON.parse(localStorage.getItem("donors") || "[]");
+let delivered = JSON.parse(localStorage.getItem("delivered") || "[]");
+let editIndex = null;
+
+function addDonor() {
+    const donor = {
+        name: document.getElementById("name").value || "Not Provided",
+        food: document.getElementById("food").value || "Not Provided",
+        qty: document.getElementById("qty").value || "Not Provided",
+        category: document.getElementById("category").value || "Not Provided",
+        address: document.getElementById("address").value || "Not Provided",
+        phone: document.getElementById("phone").value || "Not Provided"
+    };
+    if(donor.name === "Not Provided" || donor.food === "Not Provided" || donor.qty === "Not Provided" || donor.category === "Not Provided"){
+        alert("Please fill all required fields!");
+        return;
+    }
+
+    if(editIndex !== null){
+        donors[editIndex] = donor;
+        editIndex = null;
+    } else {
+        donors.push(donor);
+    }
+
+    localStorage.setItem("donors", JSON.stringify(donors));
+    alert("Donor saved!");
+    showDashboard();
+}
+
+function loadDonors(listArray = donors) {
+    const list = document.getElementById("donorList");
+    list.innerHTML = "";
+    listArray.forEach((d, i) => {
+        list.innerHTML += `
+        <div class="card">
+            <h3>${d.name}</h3>
+            <p><b>Food:</b> ${d.food}</p>
+            <p><b>Qty:</b> ${d.qty}</p>
+            <p><b>Category:</b> ${d.category}</p>
+            <p><b>Address:</b> ${d.address || "Not Provided"}</p>
+            <p><b>Phone:</b> ${d.phone || "Not Provided"}</p>
+            <button onclick="editDonor(${i})">Edit</button>
+            <button onclick="markDelivered(${i})">Mark Delivered</button>
+            <button onclick="deleteDonor(${i})">Delete</button>
+        </div>`;
+    });
+}
+
+function editDonor(i){
+    const donor = donors[i];
+    document.getElementById("name").value = donor.name;
+    document.getElementById("food").value = donor.food;
+    document.getElementById("qty").value = donor.qty;
+    document.getElementById("category").value = donor.category;
+    document.getElementById("address").value = donor.address;
+    document.getElementById("phone").value = donor.phone;
+    editIndex = i;
+    showAddDonor();
+}
+
+function filterByCategory() {
+    const cat = document.getElementById("filterCategory").value;
+    if (cat === "all") loadDonors();
+    else loadDonors(donors.filter(d => d.category === cat));
+}
+
+function markDelivered(i) {
+    const donor = {...donors[i]};
+    donor.deliveredAt = new Date().toLocaleString(); // store timestamp
+    delivered.push(donor);
+    donors.splice(i, 1);
+
+    localStorage.setItem("donors", JSON.stringify(donors));
+    localStorage.setItem("delivered", JSON.stringify(delivered));
+
+    loadDonors();
+}
+
+function loadDelivered() {
+    const list = document.getElementById("deliveredList");
+    list.innerHTML = "";
+    let sorted = [...delivered];
+    const sortType = document.getElementById("sortDelivered").value;
+    if(sortType === "latest") sorted.reverse(); // latest first
+
+    sorted.forEach(d => {
+        list.innerHTML += `
+        <div class="card">
+            <h3>${d.name}</h3>
+            <p><b>Food:</b> ${d.food}</p>
+            <p><b>Qty:</b> ${d.qty}</p>
+            <p><b>Category:</b> ${d.category}</p>
+            <p><b>Address:</b> ${d.address || "Not Provided"}</p>
+            <p><b>Phone:</b> ${d.phone || "Not Provided"}</p>
+            <p style="color:green;"><b>Delivered ✔ on ${d.deliveredAt}</b></p>
+        </div>`;
+    });
+}
+
+function deleteDonor(i) {
+    donors.splice(i, 1);
+    localStorage.setItem("donors", JSON.stringify(donors));
+    loadDonors();
+}
+
+function searchDonor() {
+    const text = document.getElementById("searchDonor").value.toLowerCase();
+    const filtered = donors.filter(d =>
+        d.name.toLowerCase().includes(text) ||
+        d.food.toLowerCase().includes(text) ||
+        d.category.toLowerCase().includes(text)
+    );
+    loadDonors(filtered);
+}
+
+// -------------- NAVIGATION ------------------
+function showAddDonor() {
+    addDonorSection.style.display = "block";
+    dashboardSection.style.display = "none";
+    deliveredSection.style.display = "none";
+    ngoSection.style.display = "none";
+}
+function showDashboard() {
+    addDonorSection.style.display = "none";
+    dashboardSection.style.display = "block";
+    deliveredSection.style.display = "none";
+    ngoSection.style.display = "none";
+    loadDonors();
+}
+function showDelivered() {
+    addDonorSection.style.display = "none";
+    dashboardSection.style.display = "none";
+    deliveredSection.style.display = "block";
+    ngoSection.style.display = "none";
+    loadDelivered();
+}
+function showNGOs() {
+    addDonorSection.style.display = "none";
+    dashboardSection.style.display = "none";
+    deliveredSection.style.display = "none";
+    ngoSection.style.display = "block";
+    loadNGOs();
+}
+
+// Live search & filter
+document.getElementById("searchDonor").addEventListener("input", searchDonor);
+document.getElementById("filterCategory").addEventListener("change", filterByCategory);
+
+showAddDonor();
+</script>
+
+</body>
+</html>
